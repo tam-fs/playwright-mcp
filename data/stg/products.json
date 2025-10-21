@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Samsung galaxy s6",
+    "category": "Phones"
+  },
+  {
+    "name": "MacBook Pro",
+    "category": "Laptops"
+  },
+  {
+    "name": "MacBook Air",
+    "category": "Laptops"
+  },
+  {
+    "name": "Sony xperia z5",
+    "category": "Phones"
+  },
+  {
+    "name": "Sony vaio i5",
+    "category": "Laptops"
+  },
+  {
+    "name": "Apple monitor 24",
+    "category": "Monitors"
+  }
+]
