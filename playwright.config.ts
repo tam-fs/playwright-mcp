@@ -35,26 +35,26 @@ export default defineConfig({
   },
 
   projects: [
-    {
-      name: 'chromium',
-      use: { 
-        viewport: null, 
-        launchOptions: {
-          args: ['--start-maximized']
-        }
-      },
-    },
+    // {
+    //   name: 'chromium',
+    //   use: { 
+    //     viewport: null, 
+    //     launchOptions: {
+    //       args: ['--start-maximized']
+    //     }
+    //   },
+    // },
 
-    {
-      name: 'Microsoft Edge',
-      use: { 
-        channel: 'msedge',
-        viewport: null, 
-        launchOptions: {
-          args: ['--start-maximized']
-        }
-      },
-    },
+    // {
+    //   name: 'Microsoft Edge',
+    //   use: { 
+    //     channel: 'msedge',
+    //     viewport: null, 
+    //     launchOptions: {
+    //       args: ['--start-maximized']
+    //     }
+    //   },
+    // },
     {
       name: 'Google Chrome',
       use: { 
