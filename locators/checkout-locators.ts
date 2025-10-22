@@ -15,6 +15,7 @@ export class CheckoutLocators extends CommonLocators {
   confirmationMessage!: Locator;
   confirmationDetails!: Locator;
   confirmationOkButton!: Locator;
+  homeLink!: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -25,17 +26,18 @@ export class CheckoutLocators extends CommonLocators {
     super.initializeLocators();
     
     // All locators use XPath selectors for DemoBlaze
-    this.checkoutModal = this.page.locator('xpath=//div[@id="orderModal"]');
-    this.nameInput = this.page.locator('xpath=//input[@id="name"]');
-    this.countryInput = this.page.locator('xpath=//input[@id="country"]');
-    this.cityInput = this.page.locator('xpath=//input[@id="city"]');
-    this.creditCardInput = this.page.locator('xpath=//input[@id="card"]');
-    this.monthInput = this.page.locator('xpath=//input[@id="month"]');
-    this.yearInput = this.page.locator('xpath=//input[@id="year"]');
-    this.purchaseButton = this.page.locator('xpath=//button[@onclick="purchaseOrder()"]');
-    this.confirmationModal = this.page.locator('xpath=//div[contains(@class,"sweet-alert") and contains(@class,"showSweetAlert")]');
-    this.confirmationMessage = this.page.locator('xpath=//h2[contains(text(),"Thank you for your purchase!")]');
-    this.confirmationDetails = this.page.locator('xpath=//p[@class="lead text-muted "]');
-    this.confirmationOkButton = this.page.locator('xpath=//button[contains(text(),"OK")]');
+    this.checkoutModal = this.page.locator('//div[@id="orderModal"]');
+    this.nameInput = this.page.locator('//input[@id="name"]');
+    this.countryInput = this.page.locator('//input[@id="country"]');
+    this.cityInput = this.page.locator('//input[@id="city"]');
+    this.creditCardInput = this.page.locator('//input[@id="card"]');
+    this.monthInput = this.page.locator('//input[@id="month"]');
+    this.yearInput = this.page.locator('//input[@id="year"]');
+    this.purchaseButton = this.page.locator('//button[@onclick="purchaseOrder()"]');
+    this.confirmationModal = this.page.locator('//div[contains(@class,"sweet-alert") and contains(@class,"showSweetAlert")]');
+    this.confirmationMessage = this.page.locator('//h2[contains(text(),"Thank you for your purchase!")]');
+    this.confirmationDetails = this.page.locator('//p[@class="lead text-muted "]');
+    this.confirmationOkButton = this.page.locator('//button[contains(text(),"OK")]');
+    this.homeLink = this.page.locator('//a[text()="Home "]');
   }
 }

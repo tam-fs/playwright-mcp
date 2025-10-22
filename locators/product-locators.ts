@@ -17,9 +17,9 @@ export class ProductLocators extends CommonLocators {
     super.initializeLocators();
     
     // All locators use XPath selectors for DemoBlaze
-    this.productName = this.page.locator('xpath=//h2[@class="name"]');
-    this.productPrice = this.page.locator('xpath=//h3[@class="price-container"]');
-    this.addToCartButton = this.page.locator('xpath=//a[@onclick="addToCart($(\'#tbodyid\').attr(\'data-id\'))"]');
-    this.homeLink = this.page.locator('xpath=//a[@class="nav-link" and contains(text(),"Home")]');
+    this.productName = this.page.locator('//h2[@class="name"]');
+    this.productPrice = this.page.locator('//h3[@class="price-container"]');
+    this.addToCartButton = this.page.locator('//a[contains(@onclick,"addToCart")]');
+    this.homeLink = this.page.locator('//a[text()="Home "]');
   }
 }

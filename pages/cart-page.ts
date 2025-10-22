@@ -17,6 +17,11 @@ export class CartPage extends CommonPage {
    */
   @step("Get cart items")
   async getCartItems(): Promise<{ name: string; price: number }[]> {
+    // Wait for cart table to be visible
+    await this.waitForVisible(this.locators.cartTable);
+    // Give extra time for items to render (increased from 1000ms to 3000ms)
+    await this.page.waitForTimeout(3000);
+    
     const items: { name: string; price: number }[] = [];
     const rows = await this.locators.cartItemRow.all();
     
@@ -40,7 +45,10 @@ export class CartPage extends CommonPage {
   @step("Verify cart contains product")
   async verifyCartContainsProduct(productName: string): Promise<void> {
     const items = await this.getCartItems();
-    const hasProduct = items.some(item => item.name === productName);
+    // Use case-insensitive comparison as website may display different casing
+    const hasProduct = items.some(item => 
+      item.name.toLowerCase() === productName.toLowerCase()
+    );
     expect.soft(hasProduct).toBeTruthy();
   }
 
@@ -50,6 +58,11 @@ export class CartPage extends CommonPage {
    */
   @step("Verify cart item count")
   async verifyCartItemCount(count: number): Promise<void> {
+    // Wait for cart table to be visible
+    await this.waitForVisible(this.locators.cartTable);
+    // Give time for items to load
+    await this.page.waitForTimeout(1000);
+    
     const itemCount = await this.locators.cartItemRow.count();
     expect.soft(itemCount).toBe(count);
   }
@@ -85,6 +98,27 @@ export class CartPage extends CommonPage {
     await this.click(deleteButton);
     // Wait for item to be removed
     await this.page.waitForTimeout(1000);
+  }
+
+  /**
+   * Clear all items from cart
+   */
+  @step("Clear all cart items")
+  async clearCart(): Promise<void> {
+    await this.waitForVisible(this.locators.cartTable);
+    await this.page.waitForTimeout(1000);
+    
+    // Keep removing items until cart is empty
+    let deleteButtons = await this.page.locator('//tbody[@id="tbodyid"]//a[contains(text(),"Delete")]').all();
+    
+    while (deleteButtons.length > 0) {
+      // Click the first delete button
+      await deleteButtons[0].click();
+      // Wait longer for the item to be removed from DOM (increased from 1000ms to 2000ms)
+      await this.page.waitForTimeout(2000);
+      // Re-query to get the updated list of delete buttons
+      deleteButtons = await this.page.locator('//tbody[@id="tbodyid"]//a[contains(text(),"Delete")]').all();
+    }
   }
 
   /**

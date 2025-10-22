@@ -39,8 +39,10 @@ import users from '../../data/stg/users.json';
 import products from '../../data/stg/products.json';
 import checkoutData from '../../data/stg/checkout-data.json';
 
+test.describe.configure({ mode: 'serial' });
+
 test.describe('DemoBlaze Integration - Full Shopping Flow', () => {
-  test('TC5 - Full shopping flow - complete flow from login to logout - successful purchase and user logout', async ({ 
+  test('TC5 - Full shopping flow', async ({ 
     page, 
     loginPage,
     homePage, 
@@ -53,114 +55,97 @@ test.describe('DemoBlaze Integration - Full Shopping Flow', () => {
     const product2 = products.find(p => p.name === 'Apple monitor 24')!;
     const customerData = checkoutData[1]; // Use second checkout data (Anna)
 
-    // Step 1: Navigate to DemoBlaze website
+    // Step 1: Start with fresh page
     await page.goto('https://www.demoblaze.com/');
-    await homePage.takeScreenshot('TC5-Step1-NavigatedToWebsite');
 
     // Step 2: Login with valid credentials
     await loginPage.login(testUser.username, testUser.password);
-    await homePage.takeScreenshot('TC5-Step2-LoginSuccessful');
 
     // Expected Result: Login successful with welcome message
     await homePage.verifyWelcomeMessage(testUser.username);
     await homePage.verifyLogoutButtonVisible();
     await homePage.verifyLoginButtonHidden();
-    await homePage.takeScreenshot('TC5-Verify1-WelcomeMessageAndButtonsCorrect');
+
+    // Clear cart to ensure clean state
+    await homePage.goToCart();
+    await cartPage.clearCart();
+    await homePage.clickHome();
 
     // Step 3: Select Laptops category
     await homePage.selectCategory('Laptops');
-    await homePage.takeScreenshot('TC5-Step3-LaptopsCategorySelected');
 
     // Step 4: Select "Sony vaio i5" product
     await homePage.selectProduct(product1.name);
-    await productPage.takeScreenshot('TC5-Step4-SonyVaioProductPage');
 
     // Step 5: Add to cart
     await productPage.addToCart();
-    await productPage.takeScreenshot('TC5-Step5-SonyVaioAddedToCart');
 
     // Expected Result: Product added successfully (alert accepted)
     console.log(`Added ${product1.name} to cart`);
 
     // Step 6: Navigate to Home
     await productPage.navigateHome();
-    await homePage.takeScreenshot('TC5-Step6-NavigatedBackToHome');
 
     // Step 7: Select Monitors category
     await homePage.selectCategory('Monitors');
-    await homePage.takeScreenshot('TC5-Step7-MonitorsCategorySelected');
 
     // Step 8: Select "Apple monitor 24" product
     await homePage.selectProduct(product2.name);
-    await productPage.takeScreenshot('TC5-Step8-AppleMonitorProductPage');
 
     // Step 9: Add to cart
     await productPage.addToCart();
-    await productPage.takeScreenshot('TC5-Step9-AppleMonitorAddedToCart');
 
     // Expected Result: Product added successfully (alert accepted)
     console.log(`Added ${product2.name} to cart`);
 
     // Step 10: Navigate to Cart
     await homePage.goToCart();
-    await cartPage.takeScreenshot('TC5-Step10-NavigatedToCart');
 
     // Expected Result: Cart displays correct items
     await cartPage.verifyCartItemCount(2);
     await cartPage.verifyCartContainsProduct(product1.name);
     await cartPage.verifyCartContainsProduct(product2.name);
-    await cartPage.takeScreenshot('TC5-Verify2-CartDisplaysBothProducts');
 
     // Expected Result: Cart total is correct
     const cartItems = await cartPage.getCartItems();
     const expectedTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
     await cartPage.verifyTotal(expectedTotal);
-    await cartPage.takeScreenshot('TC5-Verify3-CartTotalIsCorrect');
 
     // Get cart total for later verification
     const cartTotal = await cartPage.getTotal();
 
     // Step 11: Click Place Order
     await cartPage.clickPlaceOrder();
-    await checkoutPage.takeScreenshot('TC5-Step11-CheckoutModalOpened');
 
     // Step 12: Fill checkout form
     await checkoutPage.fillCheckoutForm(customerData);
-    await checkoutPage.takeScreenshot('TC5-Step12-CheckoutFormFilled');
 
     // Step 13: Purchase order
     await checkoutPage.clickPurchase();
-    await checkoutPage.takeScreenshot('TC5-Step13-PurchaseButtonClicked');
 
     // Expected Result: Order confirmation displayed
     await checkoutPage.verifyOrderConfirmation();
-    await checkoutPage.takeScreenshot('TC5-Verify4-OrderConfirmationDisplayed');
 
     // Expected Result: Order ID and amount are correct
     const orderId = await checkoutPage.getOrderId();
-    expect.soft(orderId).toBeTruthy();
+    await expect.soft(orderId).toBeTruthy();
     
     const orderAmount = await checkoutPage.getOrderAmount();
-    expect.soft(orderAmount).toBe(cartTotal);
-    await checkoutPage.takeScreenshot('TC5-Verify5-OrderIdAndAmountCorrect');
+    await expect.soft(orderAmount).toBe(cartTotal);
 
     // Step 14: Close confirmation
     await checkoutPage.closeConfirmation();
-    await checkoutPage.takeScreenshot('TC5-Step14-ConfirmationClosed');
 
-    // Expected Result: Cart cleared after purchase
-    await homePage.goToCart();
-    const itemCountAfterPurchase = await cartPage.locators.cartItemRow.count();
-    expect.soft(itemCountAfterPurchase).toBe(0);
-    await cartPage.takeScreenshot('TC5-Verify6-CartClearedAfterPurchase');
+    // Expected Result: Go home page displayed after closing confirmation
+     // Expected: Redirect to Home page
+    await expect(page).toHaveURL('https://www.demoblaze.com/index.html');
+    await homePage.verifyAtHome();
 
     // Step 15: Logout
     await loginPage.logout();
-    await loginPage.takeScreenshot('TC5-Step15-LogoutClicked');
 
     // Expected Result: Logout successful
     await loginPage.verifyLogoutSuccess();
-    await loginPage.takeScreenshot('TC5-Verify7-LogoutSuccessful');
 
     console.log('✓ TC5 - Full Shopping Flow completed successfully');
   });

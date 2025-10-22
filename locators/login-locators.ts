@@ -20,12 +20,12 @@ export class LoginLocators extends CommonLocators {
     super.initializeLocators();
     
     // All locators use XPath selectors for DemoBlaze
-    this.navbarLoginButton = this.page.locator('xpath=//a[@id="login2"]');
-    this.loginModal = this.page.locator('xpath=//div[@id="logInModal"]');
-    this.usernameInput = this.page.locator('xpath=//input[@id="loginusername"]');
-    this.passwordInput = this.page.locator('xpath=//input[@id="loginpassword"]');
-    this.modalLoginButton = this.page.locator('xpath=//button[contains(text(),"Log in") and @onclick="logIn()"]');
-    this.welcomeText = this.page.locator('xpath=//a[@id="nameofuser"]');
-    this.logoutButton = this.page.locator('xpath=//a[@id="logout2"]');
+    this.navbarLoginButton = this.page.locator('//a[@id="login2"]');
+    this.loginModal = this.page.locator('//div[@id="logInModal"]');
+    this.usernameInput = this.page.locator('//input[@id="loginusername"]');
+    this.passwordInput = this.page.locator('//input[@id="loginpassword"]');
+    this.modalLoginButton = this.page.locator('//button[contains(text(),"Log in") and @onclick="logIn()"]');
+    this.welcomeText = this.page.locator('//a[@id="nameofuser"]');
+    this.logoutButton = this.page.locator('//a[@id="logout2"]');
   }
 }

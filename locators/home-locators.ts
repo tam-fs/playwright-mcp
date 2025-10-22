@@ -21,21 +21,24 @@ export class HomeLocators extends CommonLocators {
     super.initializeLocators();
     
     // All locators use XPath selectors for DemoBlaze
-    this.categoryPhones = this.page.locator('xpath=//a[contains(text(),"Phones") and @onclick="byCat(\'phone\')"]');
-    this.categoryLaptops = this.page.locator('xpath=//a[contains(text(),"Laptops") and @onclick="byCat(\'notebook\')"]');
-    this.categoryMonitors = this.page.locator('xpath=//a[contains(text(),"Monitors") and @onclick="byCat(\'monitor\')"]');
-    this.homeNavLink = this.page.locator('xpath=//a[@class="nav-link" and contains(text(),"Home")]');
-    this.cartNavLink = this.page.locator('xpath=//a[@id="cartur"]');
-    this.navbarWelcomeText = this.page.locator('xpath=//a[@id="nameofuser"]');
-    this.navbarLoginButton = this.page.locator('xpath=//a[@id="login2"]');
-    this.navbarLogoutButton = this.page.locator('xpath=//a[@id="logout2"]');
+    this.categoryPhones = this.page.locator('//a[contains(text(),"Phones") and @onclick="byCat(\'phone\')"]');
+    this.categoryLaptops = this.page.locator('//a[contains(text(),"Laptops") and @onclick="byCat(\'notebook\')"]');
+    this.categoryMonitors = this.page.locator('//a[contains(text(),"Monitors") and @onclick="byCat(\'monitor\')"]');
+    this.homeNavLink = this.page.locator('//a[@class="nav-link" and contains(text(),"Home")]');
+    this.cartNavLink = this.page.locator('//a[text()="Cart"]');
+    this.navbarWelcomeText = this.page.locator('//a[@id="nameofuser"]');
+    this.navbarLoginButton = this.page.locator('//a[@id="login2"]');
+    this.navbarLogoutButton = this.page.locator('//a[@id="logout2"]');
   }
 
   /**
-   * Dynamic locator method for product selection using XPath
+   * Dynamic locator method for product selection using XPath with case-insensitive matching
    * @param name - Product name to select
    */
   productLink(name: string): Locator {
-    return this.page.locator(`xpath=//a[@class="hrefch" and contains(text(),"${name}")]`);
+    // Use translate() to perform case-insensitive matching
+    const lowerName = name.toLowerCase();
+    //return this.page.locator(`//a[@class="hrefch" and contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "${lowerName}")]`);
+    return this.page.locator(`//a[text()="${name}"]`);
   }
 }

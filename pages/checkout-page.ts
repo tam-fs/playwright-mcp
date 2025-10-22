@@ -19,11 +19,17 @@ export class CheckoutPage extends CommonPage {
   @step("Fill checkout form")
   async fillCheckoutForm(data: CheckoutData): Promise<void> {
     await this.waitForVisible(this.locators.checkoutModal);
+    await this.click(this.locators.nameInput);
     await this.fill(this.locators.nameInput, data.name);
+    await this.click(this.locators.countryInput);
     await this.fill(this.locators.countryInput, data.country);
+    await this.click(this.locators.cityInput);
     await this.fill(this.locators.cityInput, data.city);
+    await this.click(this.locators.creditCardInput);
     await this.fill(this.locators.creditCardInput, data.creditCard);
+    await this.click(this.locators.monthInput);
     await this.fill(this.locators.monthInput, data.month);
+    await this.click(this.locators.yearInput);
     await this.fill(this.locators.yearInput, data.year);
   }
 
@@ -73,7 +79,9 @@ export class CheckoutPage extends CommonPage {
    */
   @step("Close confirmation modal")
   async closeConfirmation(): Promise<void> {
+    await this.page.waitForTimeout(5000);
     await this.click(this.locators.confirmationOkButton);
+     // Wait a moment for modal to close
     await this.waitForHidden(this.locators.confirmationModal);
   }
 
@@ -87,5 +95,13 @@ export class CheckoutPage extends CommonPage {
     await this.clickPurchase();
     await this.verifyOrderConfirmation();
     await this.closeConfirmation();
+  }
+
+  /**
+   * Navigate back to home page
+   */
+  @step("Verify home success")
+  async verifyHomeSuccess(): Promise<void> {
+    await this.waitForVisible(this.locators.homeLink);
   }
 }

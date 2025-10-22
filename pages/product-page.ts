@@ -16,15 +16,17 @@ export class ProductPage extends CommonPage {
    */
   @step("Add product to cart")
   async addToCart(): Promise<void> {
-    // Setup dialog listener to accept alert
-    this.page.once('dialog', async (dialog) => {
-      console.log(`Alert message: ${dialog.message()}`);
-      await dialog.accept();
-    });
-
+    // Setup dialog listener and wait for it
+    const dialogPromise = this.page.waitForEvent('dialog');
+    
     await this.click(this.locators.addToCartButton);
     
-    // Wait a moment for the alert to be handled
+    // Wait for and accept the dialog
+    const dialog = await dialogPromise;
+    console.log(`Alert message: ${dialog.message()}`);
+    await dialog.accept();
+    
+    // Wait a moment after alert is handled
     await this.page.waitForTimeout(500);
   }
 

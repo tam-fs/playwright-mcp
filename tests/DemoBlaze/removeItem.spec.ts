@@ -23,6 +23,8 @@ import { test, expect } from '../base-test';
 import users from '../../data/stg/users.json';
 import products from '../../data/stg/products.json';
 
+test.describe.configure({ mode: 'serial' });
+
 test.describe('DemoBlaze Cart Feature - Remove Item', () => {
   test('TC4 - Cart functionality - remove single item from cart - cart updates with correct remaining item and total', async ({ 
     page, 
@@ -35,10 +37,18 @@ test.describe('DemoBlaze Cart Feature - Remove Item', () => {
     const product1 = products.find(p => p.name === 'Sony xperia z5')!;
     const product2 = products.find(p => p.name === 'MacBook Air')!;
 
-    // Pre-condition: Navigate to website, login, and add 2 items to cart
+    // Pre-condition: Start with fresh page
     await page.goto('https://www.demoblaze.com/');
+    
+    // Pre-condition: Login and add 2 items to cart
     await loginPage.login(testUser.username, testUser.password);
     await homePage.takeScreenshot('TC4-Precondition-LoggedIn');
+
+    // Clear cart to ensure clean state
+    await homePage.goToCart();
+    await cartPage.clearCart();
+    await homePage.clickHome();
+    await homePage.takeScreenshot('TC4-Precondition-CartCleared');
 
     // Add first product - Sony xperia z5 (Phones)
     await homePage.selectCategory('Phones');
@@ -70,6 +80,9 @@ test.describe('DemoBlaze Cart Feature - Remove Item', () => {
     await cartPage.removeItem(product1.name);
     await cartPage.takeScreenshot('TC4-Step3-SonyXperiaRemoved');
 
+    // Wait for cart to update after deletion
+    await page.waitForTimeout(2000);
+
     // Expected Result 1: Cart displays only 1 item
     await cartPage.verifyCartItemCount(1);
     await cartPage.takeScreenshot('TC4-Verify1-OnlyOneItemRemains');
@@ -86,7 +99,13 @@ test.describe('DemoBlaze Cart Feature - Remove Item', () => {
 
     // Expected Result 4: Total equals MacBook Air price only
     const finalTotal = await cartPage.getTotal();
-    const macbookPrice = finalItems.find(item => item.name === product2.name)?.price || 0;
+    // Use case-insensitive comparison as website displays "MacBook air" instead of "MacBook Air"
+    const macbookPrice = finalItems.find(item => 
+      item.name.toLowerCase() === product2.name.toLowerCase()
+    )?.price;
+    
+    // Verify MacBook price was found and matches total
+    expect.soft(macbookPrice).toBeDefined();
     expect.soft(finalTotal).toBe(macbookPrice);
     await cartPage.takeScreenshot('TC4-Verify4-TotalUpdatedCorrectly');
   });

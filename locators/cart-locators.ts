@@ -17,10 +17,10 @@ export class CartLocators extends CommonLocators {
     super.initializeLocators();
     
     // All locators use XPath selectors for DemoBlaze
-    this.cartTable = this.page.locator('xpath=//table[@class="table table-bordered table-hover table-striped"]');
-    this.cartItemRow = this.page.locator('xpath=//tbody[@id="tbodyid"]/tr[contains(@class,"success")]');
-    this.cartTotal = this.page.locator('xpath=//h3[@id="totalp"]');
-    this.placeOrderButton = this.page.locator('xpath=//button[contains(text(),"Place Order")]');
+    this.cartTable = this.page.locator('//table[@class="table table-bordered table-hover table-striped"]');
+    this.cartItemRow = this.page.locator('//tbody[@id="tbodyid"]/tr[contains(@class,"success")]');
+    this.cartTotal = this.page.locator('//h3[@id="totalp"]');
+    this.placeOrderButton = this.page.locator('//button[contains(text(),"Place Order")]');
   }
 
   /**
@@ -44,6 +44,6 @@ export class CartLocators extends CommonLocators {
    * @param productName - Name of the product to delete
    */
   deleteButtonByProductName(productName: string): Locator {
-    return this.page.locator(`xpath=//tr[td[contains(text(),"${productName}")]]//a[contains(text(),"Delete")]`);
+    return this.page.locator(`//tr[td[contains(text(),"${productName}")]]//a[contains(text(),"Delete")]`);
   }
 }

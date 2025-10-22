@@ -58,6 +58,9 @@ export class HomePage extends CommonPage {
   @step("Go to Cart")
   async goToCart(): Promise<void> {
     await this.click(this.locators.cartNavLink);
+    // Wait for cart page to load and cart items to be rendered
+    await this.page.waitForURL('**/cart.html', { timeout: 10000 });
+    await this.page.waitForTimeout(3000); // Allow time for cart items to load from storage
   }
 
   /**
@@ -85,5 +88,13 @@ export class HomePage extends CommonPage {
   @step("Verify logout button visible")
   async verifyLogoutButtonVisible(): Promise<void> {
     await expect.soft(this.locators.navbarLogoutButton).toBeVisible();
+  }
+
+  /**
+   * Verify at home page by checking URL
+   */
+  @step("Verify at home page")
+  async verifyAtHome(): Promise<void> {
+    await this.page.waitForURL('**/index.html', { timeout: 10000 });
   }
 }

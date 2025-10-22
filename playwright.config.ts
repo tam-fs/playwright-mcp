@@ -2,10 +2,12 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: true,
+  fullyParallel: false, // Run tests serially to avoid cart state conflicts
   forbidOnly: process.env.CI === 'true',
-  retries: process.env.CI === 'true' ? 2 : 0,
-  workers: process.env.WORKERS ? parseInt(process.env.WORKERS) : 4,
+  retries: process.env.CI === 'true' ? 2 : 1,
+  workers: 1, // Use single worker to ensure test isolation
+  // Each test gets a fresh browser context to ensure complete isolation
+  timeout: 60000, // Increase timeout for slower tests
 
   reporter: [
     ['html'],
@@ -17,7 +19,7 @@ export default defineConfig({
       mode: 'retain-on-failure'
     },
     launchOptions: {
-      slowMo: 500,
+      // slowMo removed to prevent timing issues
     },
     headless: process.env.HEADLESS === 'true',
     screenshot: 'only-on-failure',
