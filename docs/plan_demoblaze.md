@@ -165,22 +165,27 @@ Based on test case navigation flow:
 ```
 tests/
 └── DemoBlaze/
-    ├── login.spec.ts                    # TC1: Valid Login
-    ├── cart.spec.ts                      # TC2: Add Multiple Items
-    ├── checkout.spec.ts                  # TC3: Place Order
-    └── integration.spec.ts               # TC5: Full Shopping Flow
+    ├── auth.spec.ts                     # TC1: Login (authentication-related)
+    ├── cart.spec.ts                     # TC2, TC4: Cart operations (add items, remove item)
+    └── checkout.spec.ts                 # TC3, TC5: Checkout and full flow
 ```
 
 **Rationale**: 
-- Tests grouped by primary feature area (Login, Cart, Checkout, Integration)
-- Integration folder for end-to-end flows
-- File names descriptive of test purpose (camelCase convention)
+- **Grouped by feature domain**: Tests organized by functional area (Auth, Cart, Checkout)
+- **Balanced file size**: 1-2 tests per file to avoid overly long files
+- **Shared setup with beforeEach**: Common preconditions handled in hooks within each file
+- **Logical grouping**: 
+  - **auth.spec.ts**: Authentication tests (login/logout)
+  - **cart.spec.ts**: Cart management tests (add multiple items, remove items)
+  - **checkout.spec.ts**: Purchase flow tests (checkout with order, full e2e flow)
+- **Easy navigation**: Related tests in same file, but not overwhelming
 
 ### Naming Conventions
 
 #### Test Files
-- Pattern: `{featureAction}.spec.ts`
-- Examples: `login.spec.ts`, `addMultipleItems.spec.ts`, `placeOrder.spec.ts`
+- Pattern: `{feature}.spec.ts`
+- Examples: `auth.spec.ts`, `cart.spec.ts`, `checkout.spec.ts`
+- Each file contains 1-2 related test cases grouped by feature domain
 
 #### Test Functions
 - Pattern: `test('TC{id} - {feature/description} - {condition} - {expected outcome}', async ({ page }) => { ... })`
@@ -233,21 +238,18 @@ import { CommonPage } from "./common-pages";
 import { LoginLocators } from "../locators/login-locators";
 
 export class LoginPage extends CommonPage {
-  // Step 1: Declare readonly locators property with specific locator class type
   readonly locators: LoginLocators;
 
-  // Step 2: Constructor - receive page, call super, initialize locators
   constructor(page: Page) {
     super(page);
     this.locators = new LoginLocators(page);
   }
 
-  // Step 3: Implement high-level business methods using CommonPage utilities
+  // High-level business methods
   async login(username: string, password: string): Promise<void> {
     await this.click(this.locators.loginButton);
     await this.fill(this.locators.usernameInput, username);
-    await this.fill(this.locators.passwordInput, password);
-    await this.click(this.locators.loginModalButton);
+    // ... other steps
   }
 
   async verifyLoginSuccess(username: string): Promise<void> {
@@ -262,7 +264,7 @@ export class LoginPage extends CommonPage {
 **Key Requirements**:
 - ✅ **Inheritance**: Class must extend `CommonPage`
 - ✅ **Locators Property**: Declare `readonly locators: {PageName}Locators`
-- ✅ **Constructor**: Must call `super(page)` and initialize `this.locators = new {PageName}Locators(page)`
+- ✅ **Constructor**: Must call `super(page)` and initialize locators
 - ✅ **Method Implementation**: Use CommonPage methods (`click`, `fill`, `getText`, `waitForVisible`, etc.)
 - ✅ **Business-Level Abstraction**: Methods represent user flows, not low-level interactions
 - ✅ **Verification Methods**: Use `expect.soft` and `takeScreenshot` for assertions
@@ -288,32 +290,24 @@ import { Locator, Page } from "@playwright/test";
 import { CommonLocators } from "./common-locators";
 
 export class LoginLocators extends CommonLocators {
-  // Step 1: Declare all locator properties with ! (definite assignment assertion)
+  // Declare locator properties
   loginButton!: Locator;
   usernameInput!: Locator;
   passwordInput!: Locator;
-  loginModalButton!: Locator;
-  welcomeText!: Locator;
-  logoutButton!: Locator;
+  // ... other locators
 
-  // Step 2: Constructor - receive page, call super, initialize locators
   constructor(page: Page) {
     super(page);
     this.initializeLocators();
   }
 
-  // Step 3: initializeLocators method - MUST call super.initializeLocators() first
   protected initializeLocators(): void {
-    super.initializeLocators(); // CRITICAL: Initialize common locators first
+    super.initializeLocators(); // CRITICAL: Call parent first
     
-    // Step 4: Initialize page-specific locators with XPath placeholders
-    // IMPORTANT: All locators MUST use XPath selectors, not CSS selectors
-    this.loginButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_LOGIN_BUTTON]');
-    this.usernameInput = this.page.locator('xpath=[PLACEHOLDER_XPATH_USERNAME_INPUT]');
-    this.passwordInput = this.page.locator('xpath=[PLACEHOLDER_XPATH_PASSWORD_INPUT]');
-    this.loginModalButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_MODAL_LOGIN_BUTTON]');
-    this.welcomeText = this.page.locator('xpath=[PLACEHOLDER_XPATH_WELCOME_TEXT]');
-    this.logoutButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_LOGOUT_BUTTON]');
+    // Initialize with XPath placeholders (without 'xpath=' prefix)
+    this.loginButton = this.page.locator('[PLACEHOLDER_XPATH_LOGIN_BUTTON]');
+    this.usernameInput = this.page.locator('[PLACEHOLDER_XPATH_USERNAME_INPUT]');
+    // ... other initializations
   }
 }
 ```
@@ -323,7 +317,7 @@ export class LoginLocators extends CommonLocators {
 - ✅ **Property Declaration**: All locators declared with `!: Locator` type
 - ✅ **Constructor**: Must call `super(page)` and `this.initializeLocators()`
 - ✅ **initializeLocators**: Must be `protected`, call `super.initializeLocators()` first
-- ✅ **XPath Only**: All locators MUST use XPath selectors (`xpath=`), not CSS selectors
+- ✅ **XPath Only**: All locators MUST use XPath selectors (without `xpath=` prefix)
 - ✅ **Placeholders**: Use `[PLACEHOLDER_XPATH_*]` format for XPath selectors to be filled during implementation
 
 ### Common Utilities Needed
@@ -562,44 +556,111 @@ test('TC1 - Login functionality', async ({ page }) => {
 
 ### Handling Preconditions Efficiently
 
-#### Fixtures for Authentication
-```typescript
-// tests/fixtures/auth.fixture.ts
-import { test as base } from '@playwright/test';
-import { LoginPage } from '../../pages/login-page';
+#### Approach: Programmatic Setup Instead of Fixtures
 
-export const test = base.extend({
-  authenticatedPage: async ({ page }, use) => {
-    // Login before test
-    const loginPage = new LoginPage(page);
+Instead of creating separate fixture files, preconditions are handled **programmatically within each test** for better clarity and maintainability.
+
+#### Pattern 1: Shared Setup with beforeEach
+
+```typescript
+test.describe('DemoBlaze E-Commerce Test Suite', () => {
+  // Shared setup: Navigate to base URL before each test
+  test.beforeEach(async ({ page }) => {
     await page.goto('https://www.demoblaze.com/');
-    await loginPage.login('autouser_20251005_1234', 'autouser_20251005_1234');
-    
-    await use(page);
-    
-    // Logout after test
-    await loginPage.logout();
-  }
+  });
+  
+  // Individual tests...
 });
 ```
 
-#### Fixtures for Cart Setup
+**Benefits**:
+- All tests start from the same base URL
+- No duplicate navigation code in each test
+- Easy to add global setup (e.g., viewport size, timeouts)
+
+#### Pattern 2: Authentication Setup (for TC2, TC3, TC4)
+
 ```typescript
-// tests/fixtures/cart.fixture.ts
-export const test = base.extend({
-  cartWithItems: async ({ authenticatedPage }, use) => {
-    // Add items to cart before test
-    const homePage = new HomePage(authenticatedPage);
-    const productPage = new ProductPage(authenticatedPage);
-    
-    await homePage.selectCategory('Phones');
-    await homePage.selectProduct('Samsung galaxy s6');
-    await productPage.addToCart();
-    
-    await use(authenticatedPage);
-  }
+test('TC2 - Cart - Add Multiple Items', async ({ page }) => {
+  // Pre-condition: Login
+  const loginPage = new LoginPage(page);
+  const testUser = users[0];
+  await loginPage.login(testUser.username, testUser.password);
+  
+  // Test steps...
 });
 ```
+
+**Benefits**:
+- Clear and visible precondition in test code
+- Easy to debug and modify
+- No hidden fixture logic
+
+#### Pattern 3: Cart Setup (for TC3, TC4)
+
+```typescript
+test('TC3 - Checkout - Place Order', async ({ page }) => {
+  // Pre-condition: Login and add items
+  const loginPage = new LoginPage(page);
+  const homePage = new HomePage(page);
+  const productPage = new ProductPage(page);
+  const testUser = users[0];
+  
+  await loginPage.login(testUser.username, testUser.password);
+  
+  // Setup alert listener
+  page.on('dialog', async (dialog) => await dialog.accept());
+  
+  // Add product to cart
+  await homePage.selectCategory('Phones');
+  await homePage.selectProduct('Samsung galaxy s6');
+  await productPage.addToCart();
+  
+  // Navigate to cart
+  await homePage.goToCart();
+  
+  // Main test steps...
+});
+```
+
+**Benefits**:
+- Complete test flow visible in one place
+- Easy to understand what preconditions are needed
+- Simple to modify product selection for specific tests
+
+#### Pattern 4: Alert Handler Setup
+
+```typescript
+test('TC2 - Cart - Add Multiple Items', async ({ page }) => {
+  // Setup alert listener before actions that trigger alerts
+  page.on('dialog', async (dialog) => {
+    console.log(`Alert: ${dialog.message()}`);
+    await dialog.accept();
+  });
+  
+  // Add to cart actions will now automatically accept alerts
+  await productPage.addToCart();
+});
+```
+
+**Benefits**:
+- Single setup for all alert interactions
+- Alerts logged for debugging
+- Works for multiple "Add to cart" actions in same test
+
+#### Summary: Why No Separate Fixtures?
+
+**Reasons for programmatic setup**:
+1. **Better Readability**: Test flow is clear from start to finish
+2. **Easier Maintenance**: No need to look at separate fixture files
+3. **Simpler Debugging**: All setup code visible in test
+4. **Flexibility**: Easy to customize preconditions per test
+5. **Single File Approach**: Aligns with strategy of keeping all tests in one file
+
+**When fixtures might be useful** (for future consideration):
+- If tests grow significantly (10+ tests with identical setup)
+- If setup becomes complex (multiple API calls, database seeding)
+- If parallel execution requires isolated state management
 
 ---
 
@@ -625,22 +686,18 @@ export const test = base.extend({
 | `logout()` | - | `Promise<void>` | Click [Log out] button and verify login button visible | HomePage (unauthenticated) |
 
 #### Locators Definition
-**IMPORTANT: All locators MUST use XPath selectors, not CSS selectors.**
+**IMPORTANT: All locators MUST use XPath selectors without the 'xpath=' prefix.**
 
 ```typescript
 // locators/login-locators.ts
-import { Locator, Page } from "@playwright/test";
-import { CommonLocators } from "./common-locators";
-
 export class LoginLocators extends CommonLocators {
-  // Locator declarations
-  navbarLoginButton!: Locator;        // [PLACEHOLDER_XPATH] Navbar "Log in" button
-  loginModal!: Locator;               // [PLACEHOLDER_XPATH] Login modal container
-  usernameInput!: Locator;            // [PLACEHOLDER_XPATH] Username input field
-  passwordInput!: Locator;            // [PLACEHOLDER_XPATH] Password input field
-  modalLoginButton!: Locator;         // [PLACEHOLDER_XPATH] "Log in" button in modal
-  welcomeText!: Locator;              // [PLACEHOLDER_XPATH] "Welcome {username}" text
-  logoutButton!: Locator;             // [PLACEHOLDER_XPATH] "Log out" button
+  navbarLoginButton!: Locator;
+  loginModal!: Locator;
+  usernameInput!: Locator;
+  passwordInput!: Locator;
+  modalLoginButton!: Locator;
+  welcomeText!: Locator;
+  logoutButton!: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -650,14 +707,10 @@ export class LoginLocators extends CommonLocators {
   protected initializeLocators(): void {
     super.initializeLocators();
     
-    // All locators use XPath selectors
-    this.navbarLoginButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_NAVBAR_LOGIN_BUTTON]');
-    this.loginModal = this.page.locator('xpath=[PLACEHOLDER_XPATH_LOGIN_MODAL]');
-    this.usernameInput = this.page.locator('xpath=[PLACEHOLDER_XPATH_USERNAME_INPUT]');
-    this.passwordInput = this.page.locator('xpath=[PLACEHOLDER_XPATH_PASSWORD_INPUT]');
-    this.modalLoginButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_MODAL_LOGIN_BUTTON]');
-    this.welcomeText = this.page.locator('xpath=[PLACEHOLDER_XPATH_WELCOME_TEXT]');
-    this.logoutButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_LOGOUT_BUTTON]');
+    // All locators use XPath (without xpath= prefix)
+    this.navbarLoginButton = this.page.locator('[PLACEHOLDER_XPATH_NAVBAR_LOGIN_BUTTON]');
+    this.usernameInput = this.page.locator('[PLACEHOLDER_XPATH_USERNAME_INPUT]');
+    // ... other locators
   }
 }
 ```
@@ -688,15 +741,11 @@ export class LoginLocators extends CommonLocators {
 | `verifyLogoutButtonVisible()` | - | `Promise<void>` | Verify [Log out] button is visible | - |
 
 #### Locators Definition
-**IMPORTANT: All locators MUST use XPath selectors, not CSS selectors.**
+**IMPORTANT: All locators MUST use XPath selectors without the 'xpath=' prefix.**
 
 ```typescript
 // locators/home-locators.ts
-import { Locator, Page } from "@playwright/test";
-import { CommonLocators } from "./common-locators";
-
 export class HomeLocators extends CommonLocators {
-  // Locator declarations
   categoryPhones!: Locator;
   categoryLaptops!: Locator;
   categoryMonitors!: Locator;
@@ -714,20 +763,14 @@ export class HomeLocators extends CommonLocators {
   protected initializeLocators(): void {
     super.initializeLocators();
     
-    // All locators use XPath selectors
-    this.categoryPhones = this.page.locator('xpath=[PLACEHOLDER_XPATH_CATEGORY_PHONES]');
-    this.categoryLaptops = this.page.locator('xpath=[PLACEHOLDER_XPATH_CATEGORY_LAPTOPS]');
-    this.categoryMonitors = this.page.locator('xpath=[PLACEHOLDER_XPATH_CATEGORY_MONITORS]');
-    this.homeNavLink = this.page.locator('xpath=[PLACEHOLDER_XPATH_HOME_NAV_LINK]');
-    this.cartNavLink = this.page.locator('xpath=[PLACEHOLDER_XPATH_CART_NAV_LINK]');
-    this.navbarWelcomeText = this.page.locator('xpath=[PLACEHOLDER_XPATH_NAVBAR_WELCOME_TEXT]');
-    this.navbarLoginButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_NAVBAR_LOGIN_BUTTON]');
-    this.navbarLogoutButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_NAVBAR_LOGOUT_BUTTON]');
+    this.categoryPhones = this.page.locator('[PLACEHOLDER_XPATH_CATEGORY_PHONES]');
+    this.categoryLaptops = this.page.locator('[PLACEHOLDER_XPATH_CATEGORY_LAPTOPS]');
+    // ... other locators
   }
 
-  // Dynamic locator method for product selection using XPath
+  // Dynamic locator for product selection
   productLink(name: string): Locator {
-    return this.page.locator(`xpath=[PLACEHOLDER_XPATH_PRODUCT_LINK="${name}"]`);
+    return this.page.locator(`[PLACEHOLDER_XPATH_PRODUCT_LINK="${name}"]`);
   }
 }
 ```
@@ -757,33 +800,22 @@ export class HomeLocators extends CommonLocators {
 | `navigateHome()` | - | `Promise<void>` | Click [Home] link to return to home | HomePage |
 
 #### Locators Definition
-**IMPORTANT: All locators MUST use XPath selectors, not CSS selectors.**
+**IMPORTANT: All locators MUST use XPath selectors without the 'xpath=' prefix.**
 
 ```typescript
 // locators/product-locators.ts
-import { Locator, Page } from "@playwright/test";
-import { CommonLocators } from "./common-locators";
-
 export class ProductLocators extends CommonLocators {
-  // Locator declarations
   productName!: Locator;
   productPrice!: Locator;
   addToCartButton!: Locator;
   homeLink!: Locator;
 
-  constructor(page: Page) {
-    super(page);
-    this.initializeLocators();
-  }
-
   protected initializeLocators(): void {
     super.initializeLocators();
     
-    // All locators use XPath selectors
-    this.productName = this.page.locator('xpath=[PLACEHOLDER_XPATH_PRODUCT_NAME]');
-    this.productPrice = this.page.locator('xpath=[PLACEHOLDER_XPATH_PRODUCT_PRICE]');
-    this.addToCartButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_ADD_TO_CART_BUTTON]');
-    this.homeLink = this.page.locator('xpath=[PLACEHOLDER_XPATH_HOME_LINK]');
+    this.productName = this.page.locator('[PLACEHOLDER_XPATH_PRODUCT_NAME]');
+    this.productPrice = this.page.locator('[PLACEHOLDER_XPATH_PRODUCT_PRICE]');
+    // ... other locators
   }
 }
 ```
@@ -814,46 +846,31 @@ export class ProductLocators extends CommonLocators {
 | `clickPlaceOrder()` | - | `Promise<void>` | Click [Place Order] button | Checkout modal displayed |
 
 #### Locators Definition
-**IMPORTANT: All locators MUST use XPath selectors, not CSS selectors.**
+**IMPORTANT: All locators MUST use XPath selectors without the 'xpath=' prefix.**
 
 ```typescript
 // locators/cart-locators.ts
-import { Locator, Page } from "@playwright/test";
-import { CommonLocators } from "./common-locators";
-
 export class CartLocators extends CommonLocators {
-  // Locator declarations
   cartTable!: Locator;
   cartItemRow!: Locator;
   cartTotal!: Locator;
   placeOrderButton!: Locator;
 
-  constructor(page: Page) {
-    super(page);
-    this.initializeLocators();
-  }
-
   protected initializeLocators(): void {
     super.initializeLocators();
     
-    // All locators use XPath selectors
-    this.cartTable = this.page.locator('xpath=[PLACEHOLDER_XPATH_CART_TABLE]');
-    this.cartItemRow = this.page.locator('xpath=[PLACEHOLDER_XPATH_CART_ITEM_ROW]');
-    this.cartTotal = this.page.locator('xpath=[PLACEHOLDER_XPATH_CART_TOTAL]');
-    this.placeOrderButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_PLACE_ORDER_BUTTON]');
+    this.cartTable = this.page.locator('[PLACEHOLDER_XPATH_CART_TABLE]');
+    this.cartItemRow = this.page.locator('[PLACEHOLDER_XPATH_CART_ITEM_ROW]');
+    // ... other locators
   }
 
-  // Dynamic locator methods using XPath
+  // Dynamic locators
   cartItemName(row: Locator): Locator {
-    return row.locator('xpath=[PLACEHOLDER_XPATH_ITEM_NAME]');
-  }
-
-  cartItemPrice(row: Locator): Locator {
-    return row.locator('xpath=[PLACEHOLDER_XPATH_ITEM_PRICE]');
+    return row.locator('[PLACEHOLDER_XPATH_ITEM_NAME]');
   }
 
   deleteButton(productName: string): Locator {
-    return this.page.locator(`xpath=[PLACEHOLDER_XPATH_DELETE_BUTTON="${productName}"]`);
+    return this.page.locator(`[PLACEHOLDER_XPATH_DELETE_BUTTON="${productName}"]`);
   }
 }
 ```
@@ -884,51 +901,27 @@ export class CartLocators extends CommonLocators {
 | `completePurchase(data)` | `data: CheckoutData` | `Promise<void>` | Complete checkout: fill form → submit → verify confirmation → close | HomePage (cart cleared) |
 
 #### Locators Definition
-**IMPORTANT: All locators MUST use XPath selectors, not CSS selectors.**
+**IMPORTANT: All locators MUST use XPath selectors without the 'xpath=' prefix.**
 
 ```typescript
 // locators/checkout-locators.ts
-import { Locator, Page } from "@playwright/test";
-import { CommonLocators } from "./common-locators";
-
 export class CheckoutLocators extends CommonLocators {
-  // Locator declarations
   checkoutModal!: Locator;
   nameInput!: Locator;
   countryInput!: Locator;
-  cityInput!: Locator;
   creditCardInput!: Locator;
-  monthInput!: Locator;
-  yearInput!: Locator;
   purchaseButton!: Locator;
   confirmationModal!: Locator;
   confirmationMessage!: Locator;
   orderId!: Locator;
-  orderAmount!: Locator;
   confirmationOkButton!: Locator;
-
-  constructor(page: Page) {
-    super(page);
-    this.initializeLocators();
-  }
 
   protected initializeLocators(): void {
     super.initializeLocators();
     
-    // All locators use XPath selectors
-    this.checkoutModal = this.page.locator('xpath=[PLACEHOLDER_XPATH_CHECKOUT_MODAL]');
-    this.nameInput = this.page.locator('xpath=[PLACEHOLDER_XPATH_NAME_INPUT]');
-    this.countryInput = this.page.locator('xpath=[PLACEHOLDER_XPATH_COUNTRY_INPUT]');
-    this.cityInput = this.page.locator('xpath=[PLACEHOLDER_XPATH_CITY_INPUT]');
-    this.creditCardInput = this.page.locator('xpath=[PLACEHOLDER_XPATH_CREDIT_CARD_INPUT]');
-    this.monthInput = this.page.locator('xpath=[PLACEHOLDER_XPATH_MONTH_INPUT]');
-    this.yearInput = this.page.locator('xpath=[PLACEHOLDER_XPATH_YEAR_INPUT]');
-    this.purchaseButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_PURCHASE_BUTTON]');
-    this.confirmationModal = this.page.locator('xpath=[PLACEHOLDER_XPATH_CONFIRMATION_MODAL]');
-    this.confirmationMessage = this.page.locator('xpath=[PLACEHOLDER_XPATH_CONFIRMATION_MESSAGE]');
-    this.orderId = this.page.locator('xpath=[PLACEHOLDER_XPATH_ORDER_ID]');
-    this.orderAmount = this.page.locator('xpath=[PLACEHOLDER_XPATH_ORDER_AMOUNT]');
-    this.confirmationOkButton = this.page.locator('xpath=[PLACEHOLDER_XPATH_CONFIRMATION_OK_BUTTON]');
+    this.checkoutModal = this.page.locator('[PLACEHOLDER_XPATH_CHECKOUT_MODAL]');
+    this.nameInput = this.page.locator('[PLACEHOLDER_XPATH_NAME_INPUT]');
+    // ... other locators
   }
 }
 ```
@@ -942,62 +935,64 @@ export class CheckoutLocators extends CommonLocators {
 
 ## 5. Test Script Mapping
 
-| Test Case ID | Test File Name | Test Function Name | Page Objects Required | Fixtures Needed | Special Handling |
-|--------------|----------------|-------------------|----------------------|-----------------|------------------|
-| TC1 | `tests/DemoBlaze/Login/login.spec.ts` | `test('TC1 - Login functionality - valid credentials - successful login with welcome message and logout button visible')` | `LoginPage`, `HomePage` | None (clean browser state) | - Screenshot after each verification step<br>- Handle modal interactions |
-| TC2 | `tests/DemoBlaze/Cart/addMultipleItems.spec.ts` | `test('TC2 - Cart functionality - add multiple products from different categories - cart displays all items with correct prices and total')` | `HomePage`, `ProductPage`, `CartPage` | `authenticatedPage` (user logged in) | - Setup alert listener before addToCart()<br>- Accept alerts automatically<br>- Verify cart total calculation<br>- Screenshot after each step |
-| TC3 | `tests/DemoBlaze/Checkout/placeOrder.spec.ts` | `test('TC3 - Checkout functionality - valid customer information - order placed successfully with confirmation')` | `CartPage`, `CheckoutPage`, `HomePage` | `cartWithItems` (user logged in + items in cart) | - Verify cart before checkout<br>- Handle checkout modal<br>- Extract and verify order ID/amount<br>- Verify cart cleared after purchase<br>- Screenshot after each verification |
-| TC4 | `tests/DemoBlaze/Cart/removeItem.spec.ts` | `test('TC4 - Cart functionality - remove single item from cart - cart updates with correct remaining item and total')` | `CartPage` | `cartWithTwoItems` (user logged in + 2 specific items in cart) | - Verify initial state (2 items)<br>- Calculate expected total after removal<br>- Screenshot after removal<br>- Verify dynamic total update |
-| TC5 | `tests/DemoBlaze/Integration/fullShoppingFlow.spec.ts` | `test('TC5 - Full shopping flow - complete flow from login to logout - successful purchase and user logout')` | `LoginPage`, `HomePage`, `ProductPage`, `CartPage`, `CheckoutPage` | None (full end-to-end flow) | - Setup alert listener for multiple add to cart actions<br>- Handle all modals (login, checkout, confirmation)<br>- Verify state after each major step<br>- Screenshot after each verification<br>- Verify complete flow continuity |
+### Test Organization by Feature
 
-### Test File Structure Template
+Tests are organized into **3 files** grouped by functional domain for balanced file size and logical grouping.
+
+| Test Case ID | Test File | Test Function Name | Page Objects Required | Shared Setup (beforeEach) | Special Handling |
+|--------------|-----------|-------------------|----------------------|---------------------------|------------------|
+| TC1 | `auth.spec.ts` | `test('TC1 - Login - Valid Login - Successful login')` | `LoginPage`, `HomePage` | Navigate to base URL | Modal interactions, screenshot verification |
+| TC2 | `cart.spec.ts` | `test('TC2 - Cart - Add Multiple Items - Cart displays correctly')` | `HomePage`, `ProductPage`, `CartPage` | Navigate + Login | Alert listener, cart total calculation |
+| TC4 | `cart.spec.ts` | `test('TC4 - Cart - Remove Item - Cart updates correctly')` | `HomePage`, `ProductPage`, `CartPage` | Navigate + Login + Add 2 items | Cart state verification, total recalculation |
+| TC3 | `checkout.spec.ts` | `test('TC3 - Checkout - Place Order - Order successful')` | `CartPage`, `CheckoutPage`, `HomePage` | Navigate + Login + Add item | Checkout modal, order confirmation |
+| TC5 | `checkout.spec.ts` | `test('TC5 - Full Shopping Flow - E2E flow complete')` | All pages | Navigate to base URL | Multiple alerts, all modals, complete flow |
+
+### Benefits of This Organization
+
+1. **Logical Grouping**: Tests grouped by feature domain (Auth, Cart, Checkout)
+2. **Balanced Files**: 1-2 tests per file (not too long, not too fragmented)
+3. **Shared Context**: Related tests share beforeEach setup within same file
+4. **Easy Navigation**: Clear file names indicate test content
+5. **Maintainable**: Can add more tests to appropriate file as needed
+
+### Test File Structure Overview
+
+Each test file follows this pattern:
 
 ```typescript
-// tests/DemoBlaze/Login/login.spec.ts
+// Example: tests/DemoBlaze/cart.spec.ts
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../../pages/login-page';
-import { HomePage } from '../../../pages/home-page';
-import { testUsers } from '../../../data/users';
+import { /* required page objects */ } from '../../pages';
+import { TestDataLoader } from '../../utils/test-data-loader';
 
-test.describe('Login Feature', () => {
-  test('TC1 - Login functionality - valid credentials - successful login with welcome message and logout button visible', async ({ page }) => {
-    // Pre-condition: Navigate to website
+// Load test data once
+const users = TestDataLoader.loadUsers();
+const products = TestDataLoader.loadProducts();
+
+test.describe('Cart Management Tests', () => {
+  // Shared setup
+  test.beforeEach(async ({ page }) => {
     await page.goto('https://www.demoblaze.com/');
-    
-    const loginPage = new LoginPage(page);
-    const homePage = new HomePage(page);
-    
-    // Step 1: Click [Log in] button
-    await loginPage.openLoginModal();
-    await loginPage.takeScreenshot('TC1-Step1-LoginModal');
-    
-    // Step 2: Input Username
-    await loginPage.fillUsername(testUsers.validUser.username);
-    
-    // Step 3: Input Password
-    await loginPage.fillPassword(testUsers.validUser.password);
-    
-    // Step 4: Click [Log in]
-    await loginPage.clickLoginButton();
-    
-    // Expected Result 1: Modal closes, user stays on Home page
-    await expect.soft(page).toHaveURL('https://www.demoblaze.com/index.html');
-    await loginPage.takeScreenshot('TC1-Verify1-HomePage');
-    
-    // Expected Result 2: Navbar shows text "Welcome autouser_20251005_1234"
-    await homePage.verifyWelcomeMessage(testUsers.validUser.username);
-    await loginPage.takeScreenshot('TC1-Verify2-WelcomeMessage');
-    
-    // Expected Result 3: Display [Log out] button
-    await homePage.verifyLogoutButtonVisible();
-    await loginPage.takeScreenshot('TC1-Verify3-LogoutButton');
-    
-    // Expected Result 4: Hide [Log in] button
-    await homePage.verifyLoginButtonHidden();
-    await loginPage.takeScreenshot('TC1-Verify4-LoginButtonHidden');
+    // Additional setup if needed for this group
+  });
+
+  test('TC2 - Cart - Add Multiple Items', async ({ page }) => {
+    // Test implementation
+  });
+
+  test('TC4 - Cart - Remove Item', async ({ page }) => {
+    // Test implementation
   });
 });
 ```
+
+### Key Features
+
+1. **beforeEach Hook**: Shared setup for tests in same file
+2. **Data Loading**: Test data loaded once per file
+3. **Clear Naming**: Test descriptions match test case IDs
+4. **Programmatic Setup**: Preconditions handled within tests
+5. **Alert Handling**: Dialog listener setup where needed
 
 ---
 
@@ -1980,23 +1975,40 @@ Add to project README.md:
 ### Configuration
 Update `.env` file:
 ```bash
-HEADED_MODE=false           # Set to true for headed mode
+HEADED_MODE=false
 BASE_URL=https://www.demoblaze.com/
+TEST_ENV=stg               # Environment: stg, dev, or prod
 ```
 
-### Execution
+### Test File Organization
+Tests are organized by feature domain:
+- `tests/DemoBlaze/auth.spec.ts` - Authentication tests (TC1)
+- `tests/DemoBlaze/cart.spec.ts` - Cart management tests (TC2, TC4)
+- `tests/DemoBlaze/checkout.spec.ts` - Checkout and E2E tests (TC3, TC5)
+
+### Execution Commands
 ```bash
 # Run all DemoBlaze tests
 npx playwright test tests/DemoBlaze
 
-# Run specific test file
-npx playwright test tests/DemoBlaze/Login/login.spec.ts
+# Run specific feature tests
+npx playwright test tests/DemoBlaze/auth.spec.ts
+npx playwright test tests/DemoBlaze/cart.spec.ts
+npx playwright test tests/DemoBlaze/checkout.spec.ts
+
+# Run specific test by name
+npx playwright test -g "TC1"
+npx playwright test -g "Add Multiple Items"
 
 # Run with headed mode
 HEADED_MODE=true npx playwright test tests/DemoBlaze
 
 # Run on specific browser
-npx playwright test --project="Microsoft Edge"
+npx playwright test tests/DemoBlaze --project="Microsoft Edge"
+npx playwright test tests/DemoBlaze --project="Google Chrome"
+
+# Run with 4 workers (parallel execution)
+npx playwright test tests/DemoBlaze --workers=4
 ```
 
 ### Test Reports
@@ -2074,15 +2086,33 @@ reporter: [
 
 This comprehensive test plan provides a complete roadmap for implementing automated Playwright test scripts for the DemoBlaze e-commerce website. The plan ensures:
 
-✅ **Consistent Structure**: All tests follow established project architecture  
-✅ **Maintainability**: Page Object Model with centralized locators  
+✅ **Logical Organization**: Tests grouped by feature domain (Auth, Cart, Checkout) in 3 balanced files  
+✅ **Consistent Structure**: Page Object Model with centralized locators using XPath selectors  
+✅ **Clear XPath Format**: All locators use XPath directly without `xpath=` prefix  
 ✅ **Quality**: Soft assertions, screenshots, and comprehensive verification  
-✅ **Scalability**: Fixtures, utilities, and data management for future expansion  
-✅ **Documentation**: Clear guidelines for implementation and maintenance  
+✅ **Maintainability**: Programmatic setup with clear beforeEach hooks  
+✅ **Scalability**: Clear patterns for data management and future expansion  
+✅ **Documentation**: Guidelines focus on strategy, not verbose code examples  
+
+### Key Improvements
+
+1. **Balanced File Organization**: 3 files grouped by feature (auth, cart, checkout) - not too fragmented, not too long
+2. **beforeEach Hook**: Shared setup within each feature group
+3. **Programmatic Setup**: Authentication and cart setup visible within tests
+4. **XPath Format**: Simplified locator format (no `xpath=` prefix needed)
+5. **Plan-Focused Documentation**: Emphasizes strategy and patterns over complete code listings
+
+### Test Organization Summary
+
+| File | Test Cases | Purpose |
+|------|-----------|---------|
+| `auth.spec.ts` | TC1 | Authentication and login functionality |
+| `cart.spec.ts` | TC2, TC4 | Cart operations (add, remove items) |
+| `checkout.spec.ts` | TC3, TC5 | Checkout process and full E2E flow |
 
 ### Next Steps
 
-1. **Implementation Phase**: Developers implement test scripts according to this plan
+1. **Implementation Phase**: Developers implement test scripts following this plan
 2. **Review Phase**: Peer review using provided checklists
 3. **Execution Phase**: Run tests on Edge and Chrome with 4 workers
 4. **Validation Phase**: Verify all criteria met
@@ -2091,15 +2121,23 @@ This comprehensive test plan provides a complete roadmap for implementing automa
 ### Success Criteria
 
 The implementation is considered complete when:
-- All 5 test cases (TC1-TC5) automated and passing
+- All 5 test cases automated across 3 feature-grouped files
+- beforeEach hooks properly handle shared setup in each file
 - Tests run successfully on both Edge and Chrome browsers
 - All screenshots captured after verification steps
+- All locators use XPath format without `xpath=` prefix
 - 4 workers run tests in parallel without issues
 - Code passes peer review and QA validation
 - Documentation complete and up-to-date
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: October 21, 2025  
-**Status**: Ready for Implementation
+**Document Version**: 2.1  
+**Last Updated**: October 22, 2025  
+**Status**: Ready for Implementation  
+**Changes**: 
+- Reorganized into 3 feature-grouped files (auth, cart, checkout)
+- Reduced verbose code examples - focus on plan and strategy
+- Added beforeEach hook for shared setup within feature groups
+- Simplified XPath locator format
+- Removed unnecessary code listings - kept templates concise

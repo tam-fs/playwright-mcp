@@ -108,15 +108,12 @@ export class CartPage extends CommonPage {
     await this.waitForVisible(this.locators.cartTable);
     await this.page.waitForTimeout(1000);
     
-    // Keep removing items until cart is empty
     let deleteButtons = await this.page.locator('//tbody[@id="tbodyid"]//a[contains(text(),"Delete")]').all();
     
     while (deleteButtons.length > 0) {
       // Click the first delete button
       await deleteButtons[0].click();
-      // Wait longer for the item to be removed from DOM (increased from 1000ms to 2000ms)
       await this.page.waitForTimeout(2000);
-      // Re-query to get the updated list of delete buttons
       deleteButtons = await this.page.locator('//tbody[@id="tbodyid"]//a[contains(text(),"Delete")]').all();
     }
   }
