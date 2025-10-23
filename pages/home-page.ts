@@ -30,9 +30,9 @@ export class HomePage extends CommonPage {
         break;
     }
     await this.click(categoryLocator);
-    await this.page.waitForLoadState('domcontentloaded');
+    //await this.page.waitForLoadState('domcontentloaded');
     // Wait for products to load
-    await this.page.waitForTimeout(1000);
+    // await this.page.waitForTimeout(1000);
   }
 
   /**

@@ -75,5 +75,7 @@ export class ProductPage extends CommonPage {
   @step("Navigate to home")
   async navigateHome(): Promise<void> {
     await this.click(this.locators.homeLink);
+     // Wait a moment for home page to load
+    await this.page.waitForTimeout(1000);
   }
 }

@@ -46,16 +46,16 @@ export default defineConfig({
     //   },
     // },
 
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { 
-    //     channel: 'msedge',
-    //     viewport: null, 
-    //     launchOptions: {
-    //       args: ['--start-maximized']
-    //     }
-    //   },
-    // },
+    {
+      name: 'Microsoft Edge',
+      use: { 
+        channel: 'msedge',
+        viewport: null, 
+        launchOptions: {
+          args: ['--start-maximized']
+        }
+      },
+    },
     {
       name: 'Google Chrome',
       use: { 

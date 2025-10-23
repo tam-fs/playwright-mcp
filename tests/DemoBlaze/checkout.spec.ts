@@ -36,9 +36,9 @@ test.describe('DemoBlaze Checkout Tests', () => {
 
     // Precondition: Add product to cart
     await homePage.selectCategory('Phones');
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(1000);
     await homePage.selectProduct(samsungPhone.name);
-    await page.waitForTimeout(1000);
+    //await page.waitForTimeout(1000);
     const productPrice = await productPage.getProductPrice();
     await productPage.addToCart();
     
@@ -147,8 +147,9 @@ test.describe('DemoBlaze Checkout Tests', () => {
     await checkoutPage.closeConfirmation();
 
     // Verify back to home
-    const currentUrl = page.url();
-    expect.soft(currentUrl).toMatch(/demoblaze\.com/);
+    // const currentUrl = page.url();
+    // expect.soft(currentUrl).toMatch(/demoblaze\.com/);
+    await homePage.verifyAtHome();
 
     // Step 13: Logout
     await loginPage.logout();
