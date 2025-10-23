@@ -12,7 +12,6 @@ test.describe('DemoBlaze Cart Management Tests', () => {
     
     // Login before each test
     await loginPage.login(testUser.username, testUser.password);
-    //await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
     await homePage.goToCart();
     await cartPage.clearCart();
@@ -36,11 +35,9 @@ test.describe('DemoBlaze Cart Management Tests', () => {
 
     // Step 1: Select Phones category
     await homePage.selectCategory('Phones');
-    await page.waitForTimeout(1000);
 
     // Step 2: Select "Samsung galaxy s6"
     await homePage.selectProduct(samsungPhone.name);
-    await page.waitForTimeout(1000);
 
     // Get Samsung price
     const samsungPrice = await productPage.getProductPrice();
@@ -101,9 +98,7 @@ test.describe('DemoBlaze Cart Management Tests', () => {
     // Precondition: Add 2 products to cart
     // Add Sony xperia z5
     await homePage.selectCategory('Phones');
-    await page.waitForTimeout(1000);
     await homePage.selectProduct(sonyPhone.name);
-    await page.waitForTimeout(1000);
     const sonyPrice = await productPage.getProductPrice();
     await productPage.addToCart();
     await productPage.navigateHome();
@@ -111,9 +106,7 @@ test.describe('DemoBlaze Cart Management Tests', () => {
 
     // Add MacBook air
     await homePage.selectCategory('Laptops');
-    await page.waitForTimeout(1000);
     await homePage.selectProduct(macbookAir.name);
-    await page.waitForTimeout(1000);
     const macbookAirPrice = await productPage.getProductPrice();
     await productPage.addToCart();
 
@@ -125,14 +118,12 @@ test.describe('DemoBlaze Cart Management Tests', () => {
 
     // Step 1: Click [Delete] button for "Sony xperia z5"
     await cartPage.removeItem(sonyPhone.name);
-    //await page.waitForTimeout(2000); // Wait for removal
 
     // Step 2: Verify only 1 product remains
     await cartPage.verifyCartItemCount(1);
 
     // Step 3: Verify remaining product is "MacBook air"
     await cartPage.verifyCartContainsProduct(macbookAir.name);
-    //await cartPage.takeScreenshot('TC4-Verify2-MacBookAirRemains');
 
     // Step 4: Verify Total = MacBook air price only
     await cartPage.verifyTotal(macbookAirPrice);

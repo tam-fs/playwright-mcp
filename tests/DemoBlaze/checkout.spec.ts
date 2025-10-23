@@ -18,7 +18,7 @@ test.describe('DemoBlaze Checkout Tests', () => {
     await homePage.goToCart();
     await cartPage.clearCart();
     await homePage.clickHome();
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('domcontentloaded');
   });
 
   test('TC3 - Checkout functionality - valid customer information - order placed successfully with confirmation', async ({ 
@@ -54,7 +54,6 @@ test.describe('DemoBlaze Checkout Tests', () => {
 
     // Step 3: Click [Purchase]
     await checkoutPage.clickPurchase();
-   // await page.waitForTimeout(2000);
 
     // Verify 1: Confirmation modal displays "Thank you for your purchase!"
     await checkoutPage.verifyOrderConfirmation();
@@ -70,7 +69,6 @@ test.describe('DemoBlaze Checkout Tests', () => {
 
     // Step 4: Click [OK] to close confirmation
     await checkoutPage.closeConfirmation();
-  //  await page.waitForTimeout(1000);
 
     // Verify 5: Redirected to home page
     const currentUrl = page.url();

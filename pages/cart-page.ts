@@ -20,8 +20,6 @@ export class CartPage extends CommonPage {
   async getCartItems(): Promise<{ name: string; price: number }[]> {
     // Wait for cart table to be visible
     await this.waitForVisible(this.locators.cartTable);
-    // Give extra time for items to render (increased from 1000ms to 3000ms)
-    await this.page.waitForTimeout(3000);
     
     const items: { name: string; price: number }[] = [];
     const rows = await this.locators.cartItemRow.all();
@@ -61,11 +59,6 @@ export class CartPage extends CommonPage {
   async verifyCartItemCount(count: number): Promise<void> {
     // Wait for cart table to be visible
     await this.waitForVisible(this.locators.cartTable);
-    // Give time for items to load
-    // await this.page.waitForTimeout(1000);
-    
-    // const itemCount = await this.locators.cartItemRow.count();
-    // expect.soft(itemCount).toBe(count);
     await expect.soft(this.locators.cartItemRow).toHaveCount(count, {
     timeout: DEFAULT_TIMEOUT,
   });
@@ -98,10 +91,6 @@ export class CartPage extends CommonPage {
    */
   @step("Remove item from cart")
   async removeItem(productName: string): Promise<void> {
-    // const deleteButton = this.locators.deleteButtonByProductName(productName);
-    // await this.click(deleteButton);
-    // // Wait for item to be removed
-    // await this.page.waitForTimeout(1000);
     const deleteButton = this.locators.deleteButtonByProductName(productName);
     // Đợi nút Delete sẵn sàng để tránh click quá sớm
     await this.waitForVisible(deleteButton);
