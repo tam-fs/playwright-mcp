@@ -7,13 +7,18 @@ const products = TestDataLoader.loadProducts();
 const checkoutData = TestDataLoader.getCheckoutData(0);
 
 test.describe('DemoBlaze Checkout Tests', () => {
-  test.beforeEach(async ({ page, loginPage }) => {
+  test.beforeEach(async ({ page, loginPage, homePage, cartPage, checkoutPage }) => {
     // Navigate to DemoBlaze home page
     await page.goto('https://www.demoblaze.com/');
     
     // Login before each test
     await loginPage.login(testUser.username, testUser.password);
-    await page.waitForTimeout(2000);
+    //await page.waitForTimeout(2000);
+    await page.waitForLoadState('load');
+    await homePage.goToCart();
+    await cartPage.clearCart();
+    await homePage.clickHome();
+    await page.waitForLoadState('load');
   });
 
   test('TC3 - Checkout functionality - valid customer information - order placed successfully with confirmation', async ({ 
@@ -39,46 +44,37 @@ test.describe('DemoBlaze Checkout Tests', () => {
     
     // Go to Cart
     await homePage.goToCart();
-  //  await cartPage.takeScreenshot('TC3-Precondition-ProductInCart');
 
     // Step 1: Click [Place Order]
     await cartPage.clickPlaceOrder();
     await page.waitForTimeout(1000);
-   // await checkoutPage.takeScreenshot('TC3-Step1-CheckoutModalOpened');
 
     // Step 2: Fill customer information
     await checkoutPage.fillCheckoutForm(checkoutData);
-  //  await checkoutPage.takeScreenshot('TC3-Step2-FormFilled');
 
     // Step 3: Click [Purchase]
     await checkoutPage.clickPurchase();
-    await page.waitForTimeout(2000);
- //   await checkoutPage.takeScreenshot('TC3-Step3-PurchaseClicked');
+   // await page.waitForTimeout(2000);
 
     // Verify 1: Confirmation modal displays "Thank you for your purchase!"
     await checkoutPage.verifyOrderConfirmation();
-//    await checkoutPage.takeScreenshot('TC3-Verify1-ConfirmationMessage');
 
     // Verify 2: Order ID is displayed
     const orderId = await checkoutPage.getOrderId();
     expect.soft(orderId).toBeTruthy();
     console.log(`Order ID: ${orderId}`);
-  //  await checkoutPage.takeScreenshot('TC3-Verify2-OrderId');
 
     // Verify 3: Order amount matches cart total
     const orderAmount = await checkoutPage.getOrderAmount();
     expect.soft(orderAmount).toBe(productPrice);
- //   await checkoutPage.takeScreenshot('TC3-Verify3-OrderAmount');
 
     // Step 4: Click [OK] to close confirmation
     await checkoutPage.closeConfirmation();
-    await page.waitForTimeout(1000);
-  //  await checkoutPage.takeScreenshot('TC3-Step4-ConfirmationClosed');
+  //  await page.waitForTimeout(1000);
 
     // Verify 5: Redirected to home page
     const currentUrl = page.url();
-    await expect.soft(currentUrl).toMatch(/demoblaze\.com/);
-   // await checkoutPage.takeScreenshot('TC3-Verify5-BackToHome');
+    expect.soft(currentUrl).toMatch(/demoblaze\.com/);
 
     console.log('✅ TC3: Checkout functionality test completed successfully');
   });
@@ -91,8 +87,6 @@ test.describe('DemoBlaze Checkout Tests', () => {
     cartPage, 
     checkoutPage 
   }) => {
-    // Note: Login already done in beforeEach
-    //await homePage.takeScreenshot('TC5-Precondition-LoggedIn');
 
     // Find products to add
     const sonyVaio = products.find(p => p.name === 'Sony vaio i5');
@@ -103,13 +97,9 @@ test.describe('DemoBlaze Checkout Tests', () => {
 
     // Step 1: Select Laptops category
     await homePage.selectCategory('Laptops');
-    await page.waitForTimeout(1000);
-    //await homePage.takeScreenshot('TC5-Step1-LaptopsCategory');
 
     // Step 2: Select "Sony vaio i5"
     await homePage.selectProduct(sonyVaio.name);
-    await page.waitForTimeout(1000);
-    //await productPage.takeScreenshot('TC5-Step2-SonyProductPage');
 
     // Get Sony price
     const sonyPrice = await productPage.getProductPrice();
@@ -117,22 +107,15 @@ test.describe('DemoBlaze Checkout Tests', () => {
 
     // Step 3: Add to cart
     await productPage.addToCart();
-    //await productPage.takeScreenshot('TC5-Step3-SonyAddedToCart');
 
     // Step 4: Navigate to Home
     await productPage.navigateHome();
-    await page.waitForTimeout(1000);
-    //await homePage.takeScreenshot('TC5-Step4-BackToHome');
 
     // Step 5: Select Monitors category
     await homePage.selectCategory('Monitors');
-    await page.waitForTimeout(1000);
-    //await homePage.takeScreenshot('TC5-Step5-MonitorsCategory');
 
     // Step 6: Select "Apple monitor 24"
     await homePage.selectProduct(appleMonitor.name);
-    await page.waitForTimeout(1000);
-    //await productPage.takeScreenshot('TC5-Step6-AppleMonitorPage');
 
     // Get Apple monitor price
     const applePrice = await productPage.getProductPrice();
@@ -140,56 +123,40 @@ test.describe('DemoBlaze Checkout Tests', () => {
 
     // Step 7: Add to cart
     await productPage.addToCart();
-    //await productPage.takeScreenshot('TC5-Step7-AppleAddedToCart');
 
     // Step 8: Go to Cart
     await homePage.goToCart();
-   // await cartPage.takeScreenshot('TC5-Step8-CartPage');
 
     // Verify cart has 2 items
     await cartPage.verifyCartItemCount(2);
-   // await cartPage.takeScreenshot('TC5-Verify1-TwoItemsInCart');
 
     // Calculate expected total
     const expectedTotal = sonyPrice + applePrice;
     await cartPage.verifyTotal(expectedTotal);
-    //await cartPage.takeScreenshot('TC5-Verify2-CartTotal');
 
     // Step 9: Click [Place Order]
     await cartPage.clickPlaceOrder();
-    await page.waitForTimeout(1000);
-    //await checkoutPage.takeScreenshot('TC5-Step9-CheckoutModal');
 
     // Step 10: Fill checkout form and purchase
     await checkoutPage.fillCheckoutForm(checkoutData);
-   // await checkoutPage.takeScreenshot('TC5-Step10-FormFilled');
 
     await checkoutPage.clickPurchase();
-    await page.waitForTimeout(2000);
-   // await checkoutPage.takeScreenshot('TC5-Step11-PurchaseClicked');
 
     // Verify order confirmation
     await checkoutPage.verifyOrderConfirmation();
-    //await checkoutPage.takeScreenshot('TC5-Verify3-OrderConfirmation');
 
     // Close confirmation
     await checkoutPage.closeConfirmation();
-    await page.waitForTimeout(1000);
-    //await checkoutPage.takeScreenshot('TC5-Step12-ConfirmationClosed');
 
     // Verify back to home
     const currentUrl = page.url();
-    await expect.soft(currentUrl).toMatch(/demoblaze\.com/);
-    //await checkoutPage.takeScreenshot('TC5-Verify4-BackToHome');
+    expect.soft(currentUrl).toMatch(/demoblaze\.com/);
 
     // Step 13: Logout
     await loginPage.logout();
-    await page.waitForTimeout(1000);
-    //await loginPage.takeScreenshot('TC5-Step13-LogoutClicked');
 
     // Verify logout: Login button visible, Logout button hidden
     await loginPage.verifyLogoutSuccess();
-    //await loginPage.takeScreenshot('TC5-Verify5-LogoutSuccess');
 
     console.log('✅ TC5: Full shopping flow test completed successfully');
   });

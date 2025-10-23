@@ -17,37 +17,28 @@ test.describe('DemoBlaze Authentication Tests', () => {
   }) => {
     // Step 1: Open login modal
     await loginPage.openLoginModal();
-    // await loginPage.takeScreenshot('TC1-Step1-LoginModalOpened');
 
     // Step 2: Fill username
     await loginPage.fillUsername(testUser.username);
-    // await loginPage.takeScreenshot('TC1-Step2-UsernameEntered');
 
     // Step 3: Fill password
     await loginPage.fillPassword(testUser.password);
-    // await loginPage.takeScreenshot('TC1-Step3-PasswordEntered');
 
     // Step 4: Click login button
     await loginPage.clickLoginButton();
-    await page.waitForTimeout(2000); // Wait for login to complete
-    // await loginPage.takeScreenshot('TC1-Step4-LoginButtonClicked');
 
     // Verify 1: Modal closes, user stays on Home page
     const currentUrl = page.url();
     await expect.soft(currentUrl).toMatch(/demoblaze\.com/);
-    // await loginPage.takeScreenshot('TC1-Verify1-ModalClosed');
 
     // Verify 2: Navbar shows text "Welcome {username}"
     await homePage.verifyWelcomeMessage(testUser.username);
-    // await loginPage.takeScreenshot('TC1-Verify2-WelcomeMessage');
 
     // Verify 3: Display [Log out] button
     await homePage.verifyLogoutButtonVisible();
-    // await loginPage.takeScreenshot('TC1-Verify3-LogoutButtonVisible');
 
     // Verify 4: Hide [Log in] button
     await homePage.verifyLoginButtonHidden();
-    // await loginPage.takeScreenshot('TC1-Verify4-LoginButtonHidden');
 
     console.log('✅ TC1: Login functionality test completed successfully');
   });

@@ -79,7 +79,8 @@ export class CheckoutPage extends CommonPage {
    */
   @step("Close confirmation modal")
   async closeConfirmation(): Promise<void> {
-    await this.page.waitForTimeout(5000);
+    await this.page.waitForTimeout(3000);
+    //await this.page.waitForLoadState('load');
     await this.click(this.locators.confirmationOkButton);
      // Wait a moment for modal to close
     await this.waitForHidden(this.locators.confirmationModal);

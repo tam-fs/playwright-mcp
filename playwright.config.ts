@@ -19,6 +19,7 @@ export default defineConfig({
       mode: 'retain-on-failure'
     },
     launchOptions: {
+      slowMo: 1000,
       // slowMo removed to prevent timing issues
     },
     headless: process.env.HEADLESS === 'true',

@@ -36,9 +36,7 @@ export class HomeLocators extends CommonLocators {
    * @param name - Product name to select
    */
   productLink(name: string): Locator {
-    // Use translate() to perform case-insensitive matching
-    const lowerName = name.toLowerCase();
-    //return this.page.locator(`//a[@class="hrefch" and contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "${lowerName}")]`);
-    return this.page.locator(`//a[text()="${name}"]`);
+    //return this.page.locator(`//a[text()="${name}"]`);
+    return this.page.locator(`//a[text()="${name}" and @class="hrefch"]`)
   }
 }

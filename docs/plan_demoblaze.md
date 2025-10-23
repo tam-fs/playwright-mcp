@@ -1044,7 +1044,7 @@ data/
     "category": "Laptops"
   },
   {
-    "name": "MacBook Air",
+    "name": "MacBook air",
     "category": "Laptops"
   },
   {
@@ -1435,7 +1435,7 @@ await cartPage.takeScreenshot('Cart-TotalVerified');
 
 **Examples in Test Cases**:
 - **TC2**: Verify total = Samsung galaxy s6 price + MacBook Pro price
-- **TC4**: Verify total updated to only MacBook Air price after removing Sony xperia z5
+- **TC4**: Verify total updated to only MacBook air price after removing Sony xperia z5
 
 ---
 

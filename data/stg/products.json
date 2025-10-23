@@ -1,23 +1,28 @@
 [
   {
     "name": "Samsung galaxy s6",
-    "category": "Phones"
+    "category": "Phones",
+    "price": 360
   },
   {
     "name": "MacBook Pro",
-    "category": "Laptops"
+    "category": "Laptops",
+    "price": 1100
   },
   {
-    "name": "MacBook Air",
-    "category": "Laptops"
+    "name": "MacBook air",
+    "category": "Laptops",
+    "price": 700
   },
   {
     "name": "Sony xperia z5",
-    "category": "Phones"
+    "category": "Phones",
+    "price": 790
   },
   {
     "name": "Sony vaio i5",
-    "category": "Laptops"
+    "category": "Laptops",
+    "price": 320
   },
   {
     "name": "Apple monitor 24",

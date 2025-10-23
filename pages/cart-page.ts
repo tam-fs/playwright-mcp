@@ -2,6 +2,7 @@ import { Page, expect } from "@playwright/test";
 import { CommonPage } from "./common-pages";
 import { CartLocators } from "../locators/cart-locators";
 import { step } from "../utils/logging";
+import { DEFAULT_TIMEOUT } from "../constants/basic";
 
 export class CartPage extends CommonPage {
   readonly locators: CartLocators;
@@ -61,10 +62,13 @@ export class CartPage extends CommonPage {
     // Wait for cart table to be visible
     await this.waitForVisible(this.locators.cartTable);
     // Give time for items to load
-    await this.page.waitForTimeout(1000);
+    // await this.page.waitForTimeout(1000);
     
-    const itemCount = await this.locators.cartItemRow.count();
-    expect.soft(itemCount).toBe(count);
+    // const itemCount = await this.locators.cartItemRow.count();
+    // expect.soft(itemCount).toBe(count);
+    await expect.soft(this.locators.cartItemRow).toHaveCount(count, {
+    timeout: DEFAULT_TIMEOUT,
+  });
   }
 
   /**
@@ -94,10 +98,29 @@ export class CartPage extends CommonPage {
    */
   @step("Remove item from cart")
   async removeItem(productName: string): Promise<void> {
+    // const deleteButton = this.locators.deleteButtonByProductName(productName);
+    // await this.click(deleteButton);
+    // // Wait for item to be removed
+    // await this.page.waitForTimeout(1000);
     const deleteButton = this.locators.deleteButtonByProductName(productName);
-    await this.click(deleteButton);
-    // Wait for item to be removed
-    await this.page.waitForTimeout(1000);
+    // Đợi nút Delete sẵn sàng để tránh click quá sớm
+    await this.waitForVisible(deleteButton);
+
+    // Lấy ra hàng (row) chứa nút Delete này để chờ nó biến mất
+    const row = deleteButton.locator('xpath=ancestor::tr[1]');
+
+    // Click và song song đợi row biến mất (detached) hoặc ít nhất là bị ẩn (hidden)
+    const waitDisappear = row
+      .waitFor({ state: 'detached', timeout: DEFAULT_TIMEOUT })
+      .catch(async () => {
+        // Nếu UI không remove node mà chỉ ẩn, fallback sang kiểm tra hidden
+        await expect(row).toBeHidden({ timeout: DEFAULT_TIMEOUT });
+      });
+
+    await Promise.all([
+      waitDisappear,
+      deleteButton.click(),
+    ]);
   }
 
   /**
@@ -106,15 +129,15 @@ export class CartPage extends CommonPage {
   @step("Clear all cart items")
   async clearCart(): Promise<void> {
     await this.waitForVisible(this.locators.cartTable);
-    await this.page.waitForTimeout(1000);
-    
-    let deleteButtons = await this.page.locator('//tbody[@id="tbodyid"]//a[contains(text(),"Delete")]').all();
-    
-    while (deleteButtons.length > 0) {
-      // Click the first delete button
-      await deleteButtons[0].click();
-      await this.page.waitForTimeout(2000);
-      deleteButtons = await this.page.locator('//tbody[@id="tbodyid"]//a[contains(text(),"Delete")]').all();
+    const deleteButtons = this.page.locator('//tbody[@id="tbodyid"]//a[contains(text(),"Delete")]');
+
+    // Lặp cho đến khi hết nút Delete
+    while (await deleteButtons.count() > 0) {
+      const before = await deleteButtons.count();
+      await deleteButtons.first().click();
+
+      // Đợi điều kiện thật: số lượng giảm 1
+      await expect(deleteButtons).toHaveCount(before - 1);
     }
   }
 

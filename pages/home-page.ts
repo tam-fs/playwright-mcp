@@ -30,6 +30,7 @@ export class HomePage extends CommonPage {
         break;
     }
     await this.click(categoryLocator);
+    await this.page.waitForLoadState('load');
     // Wait for products to load
     await this.page.waitForTimeout(1000);
   }
@@ -59,7 +60,7 @@ export class HomePage extends CommonPage {
   async goToCart(): Promise<void> {
     await this.click(this.locators.cartNavLink);
     // Wait for cart page to load and cart items to be rendered
-    await this.page.waitForURL('**/cart.html', { timeout: 10000 });
+    await this.page.waitForURL('**/cart.html', { timeout: 10000 , waitUntil: 'domcontentloaded'});
     await this.page.waitForTimeout(3000); // Allow time for cart items to load from storage
   }
 

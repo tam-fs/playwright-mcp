@@ -27,7 +27,7 @@ export class ProductPage extends CommonPage {
     await dialog.accept();
     
     // Wait a moment after alert is handled
-    await this.page.waitForTimeout(500);
+    await this.page.waitForTimeout(1000);
   }
 
   /**
