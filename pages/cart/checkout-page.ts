@@ -12,6 +12,11 @@ export class CheckoutPage extends CommonPage {
     this.locators = new CheckoutLocators(page);
   }
 
+  @step("Navigate to home page")
+  async navigateToHomePage(): Promise<void> {
+    await this.page.goto("https://www.demoblaze.com");
+  }
+
   /**
    * Fill checkout form with customer information
    * @param data - Checkout form data

@@ -98,4 +98,15 @@ export class HomePage extends CommonPage {
   async verifyAtHome(): Promise<void> {
     await this.page.waitForURL('**/index.html', { timeout: 10000 });
   }
+
+  @step("Verify at home page by URL")
+  async verifyAtHomeByUrl(): Promise<void> {
+    const currentUrl = this.page.url();
+    expect.soft(currentUrl).toMatch(/demoblaze\.com/);  
+  }
+
+  @step("Navigate to home page")
+  async navigateToHomePage(): Promise<void> {
+    await this.page.goto("https://www.demoblaze.com");
+  }
 }

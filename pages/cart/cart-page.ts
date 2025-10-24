@@ -13,6 +13,11 @@ export class CartPage extends CommonPage {
     this.locators = new CartLocators(page);
   }
 
+  @step("Navigate to home page")
+  async navigateToHomePage(): Promise<void> {
+    await this.page.goto("https://www.demoblaze.com");
+  }
+
   /**
    * Get all cart items with name and price
    * @returns Array of cart items

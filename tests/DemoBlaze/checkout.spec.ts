@@ -9,7 +9,7 @@ const checkoutData = TestDataLoader.getCheckoutData(0);
 test.describe('DemoBlaze Checkout Tests', () => {
   test.beforeEach(async ({ page, loginPage, homePage, cartPage, checkoutPage }) => {
     // Navigate to DemoBlaze home page
-    await page.goto('https://www.demoblaze.com/');
+    await homePage.navigateToHomePage();
     
     // Login before each test
     await loginPage.login(testUser.username, testUser.password);

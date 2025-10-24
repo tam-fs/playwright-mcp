@@ -5,9 +5,9 @@ import { TestDataLoader } from '../../utils/test-data-loader';
 const testUser = TestDataLoader.getUser(0);
 
 test.describe('DemoBlaze Authentication Tests', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ homePage }) => {
     // Navigate to DemoBlaze home page
-    await page.goto('https://www.demoblaze.com/');
+    await homePage.navigateToHomePage();
   });
 
   test('TC1 - Login functionality - valid credentials - successful login with welcome message and logout button visible', async ({ 
@@ -28,7 +28,7 @@ test.describe('DemoBlaze Authentication Tests', () => {
     await loginPage.clickLoginButton();
 
     // Verify 1: Modal closes, user stays on Home page
-    await homePage.verifyAtHome();
+    await homePage.verifyAtHomeByUrl();
 
     // Verify 2: Navbar shows text "Welcome {username}"
     await homePage.verifyWelcomeMessage(testUser.username);

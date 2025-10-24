@@ -11,6 +11,11 @@ export class LoginPage extends CommonPage {
     this.locators = new LoginLocators(page);
   }
 
+  @step("Navigate to home page")
+  async navigateToHomePage(): Promise<void> {
+    await this.page.goto("https://www.demoblaze.com");
+  }
+
   /**
    * Open login modal by clicking [Log in] button in navbar
    */
