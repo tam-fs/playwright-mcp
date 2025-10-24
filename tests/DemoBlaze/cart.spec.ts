@@ -69,10 +69,12 @@ test.describe('DemoBlaze Cart Management Tests', () => {
     await cartPage.verifyCartItemCount(2);
 
     // Verify 2: Cart contains "Samsung galaxy s6"
-    await cartPage.verifyCartContainsProduct(samsungPhone.name);
+    //await cartPage.verifyCartContainsProduct(samsungPhone.name);
+    await cartPage.verifyCartContainsProductByPrice(samsungPhone.name, samsungPrice);
 
     // Verify 3: Cart contains "MacBook Pro"
-    await cartPage.verifyCartContainsProduct(macbookLaptop.name);
+    //await cartPage.verifyCartContainsProduct(macbookLaptop.name);
+    await cartPage.verifyCartContainsProductByPrice(macbookLaptop.name, macbookPrice);
 
     // Verify 4: Total = Samsung price + MacBook price
     const expectedTotal = samsungPrice + macbookPrice;

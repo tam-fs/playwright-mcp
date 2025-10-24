@@ -1,8 +1,9 @@
 import { Page, expect } from "@playwright/test";
-import { CommonPage } from "./common-pages";
-import { CartLocators } from "../locators/cart-locators";
-import { step } from "../utils/logging";
-import { DEFAULT_TIMEOUT } from "../constants/basic";
+import { CommonPage } from "../common-pages";
+import { CartLocators } from "../../locators/cart-locators";
+import { step } from "../../utils/logging";
+import { DEFAULT_TIMEOUT } from "../../constants/basic";
+import { log } from "console";
 
 export class CartPage extends CommonPage {
   readonly locators: CartLocators;
@@ -50,6 +51,16 @@ export class CartPage extends CommonPage {
     );
     expect.soft(hasProduct).toBeTruthy();
   }
+
+  @step("Verify cart contains product by price")
+  async verifyCartContainsProductByPrice(productName: string, productPrice: number): Promise<void> {
+    const items = await this.getCartItems();
+    const hasProduct = items.some(item => 
+      item.name.toLowerCase() === productName.toLowerCase() && item.price === productPrice
+    );  
+    
+    expect.soft(hasProduct).toBeTruthy();
+  } 
 
   /**
    * Verify the number of items in cart
@@ -136,6 +147,7 @@ export class CartPage extends CommonPage {
   @step("Click Place Order")
   async clickPlaceOrder(): Promise<void> {
     await this.click(this.locators.placeOrderButton);
+    await this.page.waitForTimeout(1000); // Wait for modal to appear
   }
 
   /**

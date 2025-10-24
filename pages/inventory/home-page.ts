@@ -1,7 +1,7 @@
 import { Page, expect } from "@playwright/test";
-import { CommonPage } from "./common-pages";
-import { HomeLocators } from "../locators/home-locators";
-import { step } from "../utils/logging";
+import { CommonPage } from "../common-pages";
+import { HomeLocators } from "../../locators/home-locators";
+import { step } from "../../utils/logging";
 
 export class HomePage extends CommonPage {
   readonly locators: HomeLocators;

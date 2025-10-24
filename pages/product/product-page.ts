@@ -1,7 +1,7 @@
 import { Page, expect } from "@playwright/test";
-import { CommonPage } from "./common-pages";
-import { ProductLocators } from "../locators/product-locators";
-import { step } from "../utils/logging";
+import { CommonPage } from "../common-pages";
+import { ProductLocators } from "../../locators/product-locators";
+import { step } from "../../utils/logging";
 
 export class ProductPage extends CommonPage {
   readonly locators: ProductLocators;

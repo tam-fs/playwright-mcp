@@ -28,8 +28,7 @@ test.describe('DemoBlaze Authentication Tests', () => {
     await loginPage.clickLoginButton();
 
     // Verify 1: Modal closes, user stays on Home page
-    const currentUrl = page.url();
-    await expect.soft(currentUrl).toMatch(/demoblaze\.com/);
+    await homePage.verifyAtHome();
 
     // Verify 2: Navbar shows text "Welcome {username}"
     await homePage.verifyWelcomeMessage(testUser.username);

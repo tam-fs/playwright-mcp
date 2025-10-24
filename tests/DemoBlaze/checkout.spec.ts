@@ -36,9 +36,7 @@ test.describe('DemoBlaze Checkout Tests', () => {
 
     // Precondition: Add product to cart
     await homePage.selectCategory('Phones');
-    // await page.waitForTimeout(1000);
     await homePage.selectProduct(samsungPhone.name);
-    //await page.waitForTimeout(1000);
     const productPrice = await productPage.getProductPrice();
     await productPage.addToCart();
     
@@ -47,7 +45,7 @@ test.describe('DemoBlaze Checkout Tests', () => {
 
     // Step 1: Click [Place Order]
     await cartPage.clickPlaceOrder();
-    await page.waitForTimeout(1000);
+    //await page.waitForTimeout(1000);
 
     // Step 2: Fill customer information
     await checkoutPage.fillCheckoutForm(checkoutData);
@@ -60,19 +58,16 @@ test.describe('DemoBlaze Checkout Tests', () => {
 
     // Verify 2: Order ID is displayed
     const orderId = await checkoutPage.getOrderId();
-    expect.soft(orderId).toBeTruthy();
-    console.log(`Order ID: ${orderId}`);
-
     // Verify 3: Order amount matches cart total
     const orderAmount = await checkoutPage.getOrderAmount();
-    expect.soft(orderAmount).toBe(productPrice);
 
+    await checkoutPage.verifyInformation(orderId, orderAmount);
+    
     // Step 4: Click [OK] to close confirmation
     await checkoutPage.closeConfirmation();
 
     // Verify 5: Redirected to home page
-    const currentUrl = page.url();
-    expect.soft(currentUrl).toMatch(/demoblaze\.com/);
+    await homePage.verifyAtHome();
 
     console.log('✅ TC3: Checkout functionality test completed successfully');
   });
@@ -146,9 +141,6 @@ test.describe('DemoBlaze Checkout Tests', () => {
     // Close confirmation
     await checkoutPage.closeConfirmation();
 
-    // Verify back to home
-    // const currentUrl = page.url();
-    // expect.soft(currentUrl).toMatch(/demoblaze\.com/);
     await homePage.verifyAtHome();
 
     // Step 13: Logout

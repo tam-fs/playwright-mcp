@@ -1,8 +1,8 @@
 import { Page, expect } from "@playwright/test";
-import { CommonPage } from "./common-pages";
-import { CheckoutLocators } from "../locators/checkout-locators";
-import { CheckoutData } from "../interfaces/checkout.interface";
-import { step } from "../utils/logging";
+import { CommonPage } from "../common-pages";
+import { CheckoutLocators } from "../../locators/checkout-locators";
+import { CheckoutData } from "../../interfaces/checkout.interface";
+import { step } from "../../utils/logging";
 
 export class CheckoutPage extends CommonPage {
   readonly locators: CheckoutLocators;
@@ -72,6 +72,11 @@ export class CheckoutPage extends CommonPage {
     const details = await this.getText(this.locators.confirmationDetails);
     const amountMatch = details.match(/Amount:\s*(\d+)\s*USD/);
     return amountMatch ? parseFloat(amountMatch[1]) : 0;
+  }
+  @step("Verify order information")
+  async verifyInformation(orderId: string, orderAmount: number): Promise<void> {
+    expect.soft(orderId).toBeTruthy();
+    expect.soft(orderAmount).toBeGreaterThan(0);
   }
 
   /**

@@ -1,11 +1,11 @@
 "Structure Project :
 - constants : chứa hằng số dùng chung
-- data : test data tĩnh theo môi trường (stg, dev,...)
+- data : test data tĩnh theo môi trường (stg, dev,...) (user.js, user.csv,..)
 - interfaces : định nghĩa TypeScript interfaces/typing cho test data
 - locators : tập trung các selector (Locator) dưới dạng class per-page, extends common-locators.ts
 - pages : Page Object Model - encapsulate business-level actions/verification, extends common-page.ts
 - tests :  chứa spec.ts files (Playwright test) theo thư mục chức năng (Ex : IT/SignIn/signIn.spec.ts....)
-- utils : chứa helper chung không thuộc page object: DB access, tab switching, other helpers.
+- utils : chứa helper chung không thuộc page object: DB access, tab switching, other helpers, readFile,...
 
 
 Yêu cầu :

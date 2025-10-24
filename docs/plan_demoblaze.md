@@ -188,7 +188,7 @@ tests/
 - Each file contains 1-2 related test cases grouped by feature domain
 
 #### Test Functions
-- Pattern: `test('TC{id} - {feature/description} - {condition} - {expected outcome}', async ({ page }) => { ... })`
+- Pattern: `test('TC{id} - {description} - {condition} - {expected outcome}', async ({ page }) => { ... })`
 - Examples:
   ```typescript
   test('TC1 - Login functionality - valid credentials - successful login with welcome message and logout button visible', async ({ page }) => { ... })
